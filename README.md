@@ -6,11 +6,11 @@
   <img src="docs/reading.jpg" width="280" alt="מסך הקריאה">
   &nbsp;
   <img src="docs/chapters.jpg" width="280" alt="רשימת הפרקים">
+  **https://tehilim.argamate.com**
 </p>
 
-אפליקציה פשוטה לקריאת תהילים, בטלפון או במחשב.
+אפליקציה פשוטה לקריאת פרקי תהילים בסדר אקראי, בטלפון או במחשב.
 
-**https://tehilim.argamate.com**
 
 ## מה היא עושה
 
