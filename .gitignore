@@ -1,0 +1,12 @@
+node_modules
+dist
+old/build
+.DS_Store
+scripts/out
+
+# Local only: working notes, design mocks and the old app's build
+CLAUDE.md
+.claude/
+mocks/
+old/
+scripts/.align.mjs

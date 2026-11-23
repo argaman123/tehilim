@@ -1,0 +1,433 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource/rubik/hebrew-400.css";
+@import "@fontsource/rubik/hebrew-500.css";
+@import "@fontsource/rubik/hebrew-600.css";
+@import "@fontsource/rubik/hebrew-800.css";
+@import "@fontsource/rubik/latin-400.css";
+@import "@fontsource/rubik/latin-500.css";
+@import "@fontsource/rubik/latin-600.css";
+@import "@fontsource/rubik/latin-800.css";
+
+@font-face {
+  font-family: "Hadasim";
+  src: url("/fonts/hadasim.ttf") format("truetype");
+  font-display: block;
+}
+
+@theme inline {
+  --font-sans: "Rubik", -apple-system, system-ui, sans-serif;
+  --font-heading: var(--font-sans);
+  --color-background: var(--bg);
+  --color-foreground: var(--text);
+  --color-popover: var(--sheet);
+  --color-popover-foreground: var(--text);
+  --color-card: var(--btn);
+  --color-primary: var(--acc);
+  --color-primary-foreground: var(--on);
+  --color-secondary: var(--btn);
+  --color-secondary-foreground: var(--text);
+  --color-muted: var(--surf);
+  --color-muted-foreground: var(--muted);
+  --color-accent: var(--btn);
+  --color-accent-foreground: var(--text);
+  --color-border: var(--line);
+  --color-input: var(--line);
+  --color-ring: var(--acc);
+}
+
+/*
+  One hue per position in the book: --h turns once around the color wheel per round (set from
+  the progress in App). Every color is derived from it in OKLCH, so lightness stays even across hues.
+*/
+@property --h {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 25;
+}
+
+:root {
+  color-scheme: dark;
+  /* Saturated, a little darker than mid-tone (mock 16, option C). */
+  --bl: 0.3;
+  --bc: 0.1;
+  --bg: oklch(var(--bl) var(--bc) var(--h));
+  --btn: oklch(calc(var(--bl) + 0.06) calc(var(--bc) + 0.01) var(--h));
+  --surf: oklch(calc(var(--bl) + 0.09) calc(var(--bc) + 0.01) var(--h));
+  --hi: oklch(calc(var(--bl) + 0.15) calc(var(--bc) + 0.01) var(--h));
+  --sheet: oklch(calc(var(--bl) - 0.1) var(--bc) var(--h));
+  --line: oklch(calc(var(--bl) + 0.08) var(--bc) var(--h));
+  --text: oklch(0.97 0.012 var(--h));
+  --muted: oklch(0.8 0.045 var(--h));
+  --acc: oklch(0.86 0.11 var(--h));
+  --on: oklch(0.25 0.08 var(--h));
+  --fs: 30px;
+  --col: 560px;
+}
+/* Set after the first paint, so opening the app doesn't animate from red. */
+:root.ready {
+  transition: --h 1.6s ease;
+}
+
+@layer base {
+  /* The document never scrolls; the reading column scrolls inside itself. */
+  html, body, #root { height: 100%; overflow: hidden; }
+  html {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+    overscroll-behavior: none;
+  }
+  /*
+    iOS 26 gives a home-screen app a viewport that stops short of the screen bottom by the status-bar
+    height, leaving an empty strip (WebKit bug 301108). A document taller than that viewport avoids it;
+    100lvh caps it at the screen where the bug isn't there.
+  */
+  @media (display-mode: standalone) {
+    html { height: min(100lvh, calc(100% + env(safe-area-inset-top, 0px))); }
+  }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  button {
+    font: inherit;
+    color: inherit;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+  svg { flex: none; }
+}
+
+/* ---------- reading ---------- */
+.txt {
+  height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  /* The browser keeps vertical scrolling; pinching is handled in JS to resize the text. */
+  touch-action: pan-y;
+}
+.txt::-webkit-scrollbar { display: none; }
+.col {
+  max-width: var(--col);
+  margin: 0 auto;
+  padding: 0 22px;
+}
+.intro {
+  display: flex;
+  flex-direction: column;
+  /* The heading shares its line with the buttons, level with them; the dedication gets a full line (mock 21, B). */
+  align-items: stretch;
+  gap: 6px;
+  padding: calc(env(safe-area-inset-top, 0px) + 9px) 0 20px; /* row center = the bar buttons' center (bar top + 6 + 21) */
+}
+.ttl {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  padding: 2px 6px;
+  border-radius: 12px;
+}
+.ttl .pk { font-size: 15px; color: var(--muted); font-weight: 500; }
+.ttl .nm { font-size: 22px; line-height: 1.1; font-weight: 800; letter-spacing: -0.01em; }
+.head { display: flex; align-items: center; gap: 10px; min-height: 52px; }
+.intro .ttl { gap: 10px; padding: 0; }
+/* The letter alone, medium weight, 56px (mock 29). Lifted 4px so the letters' body is centered on the 42px buttons,
+   5px clear above and below (pixel-checked in WebKit); ק's tail hangs below that on purpose. */
+.intro .ttl .nm { font-size: 56px; font-weight: 500; line-height: 52px; top: -4px; } /* line box = the row's 52px, so the row stays level with the buttons */
+.daily { position: relative; width: 40px; height: 40px; flex: none; display: grid; place-items: center; }
+.daily svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.daily rect { fill: none; stroke-width: 3; }
+.daily .track { stroke: rgb(255 255 255 / 0.16); }
+.daily .done { stroke: oklch(0.97 0.012 var(--h) / 0.75); }
+.daily .add { stroke: oklch(0.88 0.15 var(--lh)); }
+.daily b { font-size: 13.5px; font-weight: 600; font-variant-numeric: tabular-nums; color: oklch(0.88 0.15 var(--lh)); }
+.ded {
+  text-align: start;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.4;
+  white-space: pre-line;
+  outline: none;
+  min-height: 1.4em;
+  min-width: 6em;
+  -webkit-user-select: text;
+  user-select: text;
+}
+.ded:empty::before { content: attr(data-ph); opacity: 0.4; }
+.hair {
+  height: 3px;
+  display: flex;
+  background: var(--btn);
+  border-radius: 2px;
+  overflow: hidden;
+  flex: none;
+}
+.hair i { display: block; height: 100%; transition: width 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.hair .s1 { background: var(--muted); opacity: 0.55; }
+.hair .s2 { background: var(--acc); }
+.hair .s3 { background: oklch(0.86 0.11 var(--h) / 0.3); }
+.intro .hair { margin-top: 6px; }
+
+.verses {
+  font-family: "Hadasim", serif;
+  font-size: var(--fs);
+  line-height: 1.3;
+  -webkit-user-select: text;
+  user-select: text;
+  animation: fade 0.35s ease;
+}
+@keyframes fade {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+.v { margin: 0 0 0.5em; }
+.vn {
+  color: var(--muted);
+  font-size: 0.55em;
+  font-weight: 600;
+  margin-left: 0.4em;
+  font-family: var(--font-sans);
+  vertical-align: 0.3em;
+}
+.gap { height: 0.8em; }
+
+.end {
+  padding: 24px 0 calc(env(safe-area-inset-bottom, 0px) + 80px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.fin {
+  width: 100%;
+  max-width: 420px;
+  border-radius: 15px;
+  background: var(--acc);
+  color: var(--on);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: center;
+  transition: transform 0.12s ease;
+}
+.fin:active { transform: scale(0.97); }
+/* Today's goal is met: a deeper shade of the accent, so the button reads as done for today. */
+.fin.met { background: oklch(0.72 0.12 var(--h)); }
+.fin b { font-size: 18px; font-weight: 600; }
+.fin span { font-size: 13.5px; opacity: 0.75; }
+.read-chip { font-size: 14px; color: var(--muted); display: flex; gap: 6px; align-items: center; }
+.read-chip svg { width: 16px; height: 16px; color: var(--acc); }
+.done-card {
+  width: 100%;
+  background: var(--btn);
+  border-radius: 20px;
+  padding: 20px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+.done-card .num { font-size: 60px; font-weight: 800; line-height: 1; color: var(--acc); font-variant-numeric: tabular-nums; }
+.done-card .t1 { font-size: 21px; font-weight: 600; }
+.done-card .t2 { font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.done-card .fin { margin-top: 14px; max-width: none; }
+
+/* floating bar: at rest only the two buttons show; after the big title scrolls away it fills in */
+.bar {
+  position: fixed;
+  z-index: 10;
+  /* Close under the status bar; the heading row below is kept level with these buttons. */
+  top: calc(env(safe-area-inset-top, 0px) + 8px);
+  left: max(10px, calc((100% - var(--col)) / 2 + 10px));
+  right: max(10px, calc((100% - var(--col)) / 2 + 10px));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px;
+  border-radius: 20px;
+  background-color: transparent;
+  overflow: hidden;
+  transition: background-color 0.25s;
+}
+.bar .ttl { opacity: 0; transform: translateY(8px); transition: opacity 0.22s, transform 0.22s; pointer-events: none; }
+/* At rest the bar is only its buttons, and taps elsewhere reach the heading under it. Scrolled, it keeps the
+   settings button and the way back; shuffle goes. */
+.bar { pointer-events: none; }
+.bar.on { pointer-events: auto; }
+.bar .ib { pointer-events: auto; }
+.bar .btns { display: flex; gap: 6px; }
+/* Scrolled, the right side balances the gear: back to the top of the chapter, or back to the next chapter when
+   one was picked from the list. */
+.bar .side { opacity: 0; pointer-events: none; }
+.bar.on .side { opacity: 1; pointer-events: auto; }
+.bar.on .shuf { opacity: 0; pointer-events: none; }
+/* Between the two buttons: the chapter letter centered over the book line (with today's parts). */
+.bar .mid { position: absolute; inset: 0 62px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; pointer-events: none; }
+.bar .hair { align-self: stretch; background: var(--hi); opacity: 0; transition: opacity 0.25s; }
+/* Hebrew letters sit low in the font's box; lift the letter so its body centers on what's beside it. */
+.ttl .nm { position: relative; top: -0.06em; }
+.bar.on { background-color: var(--surf); }
+/* Scrolled, the text passing under the bar and the status bar is blurred and dimmed (mock 25, D), lighter than
+   the mock and fading out over a long edge so it doesn't read as a block. */
+.shade {
+  position: fixed;
+  z-index: 9;
+  inset: 0 0 auto;
+  height: calc(env(safe-area-inset-top, 0px) + 100px);
+  pointer-events: none;
+  background: oklch(var(--bl) var(--bc) var(--h) / 0.3);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 64px), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 64px), transparent);
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+.shade.on { opacity: 1; }
+.bar.on .ttl { opacity: 1; transform: none; pointer-events: auto; }
+.bar.on .hair { opacity: 1; }
+.bar.on .ib { background: var(--hi); }
+.ib {
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  background: var(--btn);
+  display: grid;
+  place-items: center;
+  flex: none;
+  transition: background-color 0.25s, opacity 0.2s, transform 0.12s ease;
+}
+.ib:active { transform: scale(0.92); }
+.ib svg { width: 20px; height: 20px; }
+.ib:disabled { opacity: 0.4; }
+
+/* ---------- sheets ---------- */
+.sh-hd { display: flex; justify-content: space-between; align-items: center; padding: 6px 18px 12px; gap: 10px; }
+.sh-hd h2 { font-size: 18px; font-weight: 600; margin: 0; }
+.sh-hd span { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.sheet-body { overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 18px); }
+
+.grid {
+  padding: 4px 16px 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
+  gap: 6px;
+}
+.cell {
+  height: 50px;
+  border-radius: 11px;
+  font-family: "Hadasim", serif;
+  font-size: 22px;
+  display: grid;
+  place-items: center;
+  position: relative;
+  transition: transform 0.1s;
+}
+.cell:active { transform: scale(0.92); }
+/* Read: no background, the letter muted, a small check under it. */
+.cell.read { background: transparent; color: var(--muted); grid-template-rows: 1fr auto; padding-bottom: 5px; }
+.cell.read .l { align-self: end; line-height: 1; }
+.cell.read svg { width: 10px; height: 10px; stroke-width: 3.5; color: var(--acc); }
+.cell.next { background: var(--text); color: #0a0a0a; }
+
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 0 16px 12px; }
+.stats > div, .stats > button {
+  background: var(--btn);
+  border-radius: 14px;
+  padding: 10px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.stats b { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.stats span { font-size: 12.5px; color: var(--muted); }
+.stats .hold { transition: background-color 0.15s; }
+.stats .hold:active { background: var(--hi); transition: background-color 0.5s linear; }
+.preview {
+  margin: 0 16px 12px;
+  background: var(--btn);
+  border-radius: 16px;
+  padding: 14px 16px;
+  font-family: "Hadasim", serif;
+  font-size: var(--fs);
+  line-height: 1.45;
+  max-height: 150px;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(#000 70%, transparent);
+  mask-image: linear-gradient(#000 70%, transparent);
+}
+.size-row { display: flex; align-items: center; gap: 14px; padding: 0 18px 16px; }
+.size-row .a1 { font-family: "Hadasim", serif; font-size: 16px; color: var(--muted); }
+.size-row .a2 { font-family: "Hadasim", serif; font-size: 28px; color: var(--muted); }
+.slider { flex: 1; }
+.slider-control { display: flex; align-items: center; height: 28px; touch-action: none; }
+.slider-track { position: relative; flex: 1; height: 6px; border-radius: 3px; background: var(--hi); }
+.slider-indicator { height: 100%; border-radius: 3px; background: var(--acc); }
+.slider-thumb { width: 24px; height: 24px; border-radius: 8px; background: var(--text); outline: none; }
+.slider-thumb:focus-visible { box-shadow: 0 0 0 3px var(--acc); }
+.sub { font-size: 13px; color: var(--muted); padding: 0 18px 6px; }
+.presets { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 0 16px 12px; }
+.presets button { height: 42px; border-radius: 11px; background: var(--btn); font-weight: 600; font-variant-numeric: tabular-nums; }
+.presets button[aria-pressed="true"] { background: var(--acc); color: var(--on); }
+.group { margin: 0 16px 12px; background: var(--btn); border-radius: 16px; padding: 0 14px; }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--line); }
+.row:last-child { border-bottom: 0; }
+.row label { font-size: 16px; }
+.step { display: flex; align-items: center; gap: 6px; }
+.step button { width: 36px; height: 36px; border-radius: 10px; background: var(--hi); display: grid; place-items: center; }
+.step button:active { transform: scale(0.92); }
+.step svg { width: 16px; height: 16px; }
+.step output { min-width: 44px; text-align: center; font-weight: 600; font-variant-numeric: tabular-nums; }
+.switch { width: 50px; height: 30px; border-radius: 9px; background: var(--hi); position: relative; transition: background-color 0.2s; flex: none; }
+.switch[data-checked] { background: var(--acc); }
+.switch-thumb { position: absolute; top: 3px; right: 3px; width: 24px; height: 24px; border-radius: 7px; background: var(--muted); transition: transform 0.25s cubic-bezier(0.3, 0.7, 0.2, 1), background-color 0.2s; }
+.switch[data-checked] .switch-thumb { transform: translateX(-20px); background: var(--on); }
+
+.books-dlg { display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 20px 18px; }
+.books-dlg h2 { font-size: 17px; font-weight: 600; margin: 0; }
+.books-n { display: flex; align-items: center; gap: 18px; }
+.books-n button { width: 48px; height: 48px; border-radius: 14px; background: var(--hi); display: grid; place-items: center; }
+.books-n output { font-size: 44px; font-weight: 800; min-width: 70px; text-align: center; font-variant-numeric: tabular-nums; }
+.dlg-actions { display: flex; gap: 8px; align-self: stretch; }
+.dlg-actions button { flex: 1; padding: 13px; border-radius: 13px; font-weight: 600; font-size: 16px; }
+.dlg-actions .primary { background: var(--acc); color: var(--on); }
+.dlg-actions .secondary { background: var(--btn); color: var(--muted); }
+
+@media (prefers-reduced-motion: reduce) {
+  :root.ready { transition: none; }
+  .verses { animation: none; }
+}
+
+/* Sheets and the dialog are darker than the page, so their cards and controls step down with them. */
+[data-slot="drawer-popup"].sheet, .books-dlg {
+  --btn: oklch(calc(var(--bl) - 0.04) calc(var(--bc) + 0.01) var(--h));
+  --hi: oklch(calc(var(--bl) + 0.03) calc(var(--bc) + 0.01) var(--h));
+  --line: oklch(calc(var(--bl) - 0.06) var(--bc) var(--h));
+  --surf: oklch(calc(var(--bl) - 0.01) var(--bc) var(--h)); /* the sheet's drag handle */
+}
+/* The dialog opens over a sheet, so it sits a step lighter than one. */
+.books-dlg { --sheet: oklch(calc(var(--bl) - 0.05) var(--bc) var(--h)); }
+
+/* sheets keep the reading column's width on wide screens */
+[data-slot="drawer-popup"].sheet {
+  border: 0;
+  border-radius: 24px 24px 0 0;
+  left: max(0px, calc((100% - var(--col)) / 2)) !important;
+  right: max(0px, calc((100% - var(--col)) / 2)) !important;
+}
+[data-slot="dialog-overlay"] { background: rgb(0 0 0 / 0.5); backdrop-filter: none; z-index: 60; }
